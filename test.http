@@ -1,0 +1,33 @@
+### Test MongoDB Connection
+GET http://localhost:3000/api/test
+
+### Test Register
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "123456"
+}
+
+### Test Login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "123456"
+}
+
+### Test Get Knowledge (need to be logged in)
+GET http://localhost:3000/api/knowledge
+
+### Test Create Knowledge
+POST http://localhost:3000/api/knowledge
+Content-Type: application/json
+
+{
+  "title": "Test Knowledge",
+  "content": "This is a test knowledge item about React hooks and how they work in Next.js applications."
+}
