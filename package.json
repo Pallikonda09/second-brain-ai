@@ -15,7 +15,7 @@
     "mongoose": "^8.3.0",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
-    "lucide-react": "^0.378.0"
+    "lucide-react": "^0.468.0"
   },
   "devDependencies": {
     "typescript": "^5",
