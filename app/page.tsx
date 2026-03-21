@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { verifyToken } from "@/lib/auth";
+import MobileMenu from "@/components/MobileMenu";
 
 const features = [
   {
@@ -69,11 +70,26 @@ export default async function LandingPage() {
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Link href="/login" className="btn-ghost">Sign in</Link>
-          <Link href="/register" className="btn-primary" style={{ padding: "8px 18px" }}>
-            Get started free →
-          </Link>
-        </div>
+
+  {/* Desktop */}
+  <div className="desktop-nav-items" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <Link href="/login" className="btn-ghost" style={{ fontSize: 13 }}>
+      Sign in
+    </Link>
+    <Link href="/register" className="btn-primary" style={{ fontSize: 13, padding: "8px 18px" }}>
+      Get started free →
+    </Link>
+  </div>
+
+  {/* Mobile hamburger */}
+  <div className="hamburger-btn">
+    <MobileMenu items={[
+      { href: "/register", label: "Get started free", icon: "🚀", primary: true },
+      { href: "/login", label: "Sign in", icon: "👤" },
+    ]} />
+  </div>
+
+</div>
       </nav>
 
       {/* ── Hero ── */}
@@ -85,8 +101,8 @@ export default async function LandingPage() {
             borderRadius: 999, padding: "6px 14px", fontSize: 12,
             color: "var(--text-secondary)", marginBottom: 28,
           }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--success)", display: "inline-block" }} />
-            Free Groq AI · llama-3.3-70b · No credit card required
+            {/* <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--success)", display: "inline-block" }} />
+            Free Groq AI · llama-3.3-70b · No credit card required */}
           </div>
 
           <h1 style={{ fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 800, lineHeight: 1.1, marginBottom: 20 }}>
