@@ -1,11 +1,19 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import ThemeToggle from "@/components/ThemeToggle";
+
+type SummaryLength = "short" | "medium" | "long";
+
+const lengthOptions: { value: SummaryLength; label: string; desc: string; icon: string }[] = [
+  { value: "short", label: "Short", desc: "2-3 sentences", icon: "⚡" },
+  { value: "medium", label: "Medium", desc: "2-3 paragraphs", icon: "📝" },
+  { value: "long", label: "Detailed", desc: "5-6 paragraphs", icon: "📖" },
+];
 
 export default function CapturePage() {
-  const router = useRouter();
   const [form, setForm] = useState({ title: "", content: "", source: "" });
+  const [summaryLength, setSummaryLength] = useState<SummaryLength>("medium");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -17,11 +25,11 @@ export default function CapturePage() {
       const res = await fetch("/api/knowledge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, summaryLength }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error); return; }
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     } finally {
       setLoading(false);
     }
@@ -34,18 +42,19 @@ export default function CapturePage() {
       <nav style={{
         borderBottom: "1px solid var(--border)",
         padding: "0 24px", height: 56,
-        display: "flex", alignItems: "center", gap: 12,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
         background: "rgba(10,10,15,0.9)", backdropFilter: "blur(16px)",
       }}>
-        <Link href="/dashboard" className="btn-ghost" style={{ fontSize: 13 }}>
-          ← Back
-        </Link>
-        <span style={{
-          width: 1, height: 16, background: "var(--border)", display: "inline-block",
-        }} />
-        <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
-          Capture Knowledge
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Link href="/dashboard" className="btn-ghost" style={{ fontSize: 13 }}>
+            ← Back
+          </Link>
+          <span style={{ width: 1, height: 16, background: "var(--border)", display: "inline-block" }} />
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
+            Capture Knowledge
+          </span>
+        </div>
+        <ThemeToggle />
       </nav>
 
       {/* ── Main ── */}
@@ -57,8 +66,7 @@ export default function CapturePage() {
             Add to your Second Brain
           </h1>
           <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6 }}>
-            Paste any text, article or idea. Groq AI will automatically
-            summarize it and generate tags for you.
+            Paste any text, article or idea. Choose how detailed you want the AI summary.
           </p>
         </div>
 
@@ -69,7 +77,7 @@ export default function CapturePage() {
           borderRadius: 999, padding: "6px 14px", fontSize: 12,
           color: "var(--brand-light)", marginBottom: 28,
         }}>
-          ⚡ Powered by Groq · llama3-70b · Auto summarize + tag
+          ⚡ Powered by Groq · llama-3.3-70b · Auto summarize + tag
         </div>
 
         {/* Form */}
@@ -80,7 +88,7 @@ export default function CapturePage() {
               borderRadius: 10, padding: "10px 14px", fontSize: 13,
               color: "var(--danger)", marginBottom: 20,
             }}>
-              {error}
+              ⚠️ {error}
             </div>
           )}
 
@@ -91,8 +99,7 @@ export default function CapturePage() {
               <label className="label">Title *</label>
               <input
                 type="text" className="input"
-                placeholder="What is this about?"
-                required
+                placeholder="What is this about?" required
                 value={form.title}
                 onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
               />
@@ -104,12 +111,49 @@ export default function CapturePage() {
               <textarea
                 className="input"
                 placeholder="Paste your article, notes, or any text here…"
-                required
-                rows={10}
+                required rows={10}
                 value={form.content}
                 onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
                 style={{ resize: "vertical", minHeight: 200, fontFamily: "inherit", lineHeight: 1.6 }}
               />
+            </div>
+
+            {/* ── Summary Length Selector ── */}
+            <div>
+              <label className="label">AI Summary Length</label>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+                {lengthOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSummaryLength(opt.value)}
+                    style={{
+                      padding: "14px 10px", borderRadius: 12, cursor: "pointer",
+                      border: `2px solid ${summaryLength === opt.value ? "var(--brand)" : "var(--border)"}`,
+                      background: summaryLength === opt.value
+                        ? "rgba(108,99,255,0.1)"
+                        : "var(--surface-2)",
+                      transition: "all 0.2s", textAlign: "center",
+                      boxShadow: summaryLength === opt.value
+                        ? "0 0 16px rgba(108,99,255,0.15)"
+                        : "none",
+                    }}
+                  >
+                    <div style={{ fontSize: 24, marginBottom: 6 }}>{opt.icon}</div>
+                    <div style={{
+                      fontSize: 13, fontWeight: 600, marginBottom: 3,
+                      color: summaryLength === opt.value
+                        ? "var(--brand-light)"
+                        : "var(--text-primary)",
+                    }}>
+                      {opt.label}
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                      {opt.desc}
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Source */}
@@ -153,8 +197,11 @@ export default function CapturePage() {
                 borderRadius: 10, padding: "12px 16px", fontSize: 13,
                 color: "var(--text-secondary)", lineHeight: 1.6,
               }}>
-                ✨ Groq AI is reading your content, generating a summary and creating relevant tags…
-                This usually takes 2–3 seconds.
+                ✨ Groq AI is generating a{" "}
+                <strong style={{ color: "var(--brand-light)" }}>
+                  {summaryLength === "short" ? "short" : summaryLength === "medium" ? "medium" : "detailed"}
+                </strong>{" "}
+                summary and creating tags… This usually takes 2–5 seconds.
               </div>
             )}
           </form>

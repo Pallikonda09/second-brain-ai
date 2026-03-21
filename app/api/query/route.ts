@@ -14,23 +14,22 @@ export async function POST(req: NextRequest) {
   if (!query)
     return NextResponse.json({ error: "Query is required" }, { status: 400 });
 
+  // Fetch user knowledge base
   const items = await KnowledgeItem.find({ userId: user.userId })
     .select("title summary content tags")
     .lean();
 
-  if (!items.length) {
-    return NextResponse.json({
-      answer: "Your knowledge base is empty! Go to the dashboard and add some knowledge items first, then I can answer questions about them.",
-    });
-  }
-
-  const context = items
-    .map((item, i) =>
-      `[${i + 1}] Title: ${item.title}\nSummary: ${item.summary || item.content.slice(0, 200)}\nTags: ${item.tags.join(", ")}`
-    )
-    .join("\n\n");
+  // Build context from knowledge base
+  const context = items.length
+    ? items
+        .map((item, i) =>
+          `[${i + 1}] Title: ${item.title}\nSummary: ${item.summary || item.content.slice(0, 300)}\nTags: ${item.tags.join(", ")}`
+        )
+        .join("\n\n")
+    : "No knowledge base items yet.";
 
   const answer = await queryKnowledge(query, context, history as GroqMessage[]);
-
   return NextResponse.json({ answer });
 }
+
+

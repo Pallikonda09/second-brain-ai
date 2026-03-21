@@ -1,7 +1,9 @@
 const GROQ_API_KEY = process.env.GROQ_API_KEY!;
 const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
 
-export const GROQ_MODEL = "llama3-70b-8192";
+export const GROQ_MODEL = "llama-3.3-70b-versatile";
+
+export type SummaryLength = "short" | "medium" | "long";
 
 export interface GroqMessage {
   role: "system" | "user" | "assistant";
@@ -22,7 +24,7 @@ export async function groqComplete(
       model: options.model ?? GROQ_MODEL,
       messages,
       temperature: options.temperature ?? 0.7,
-      max_tokens: options.max_tokens ?? 1024,
+      max_tokens: options.max_tokens ?? 2048,
     }),
   });
 
@@ -35,16 +37,28 @@ export async function groqComplete(
   return data.choices[0]?.message?.content ?? "";
 }
 
-// ── AI Services ──────────────────────────────────────────
+export async function summarizeKnowledge(
+  content: string,
+  length: SummaryLength = "medium"
+): Promise<string> {
+  const instructions = {
+    short: "Summarize in 2-3 sentences only. Be very concise and to the point.",
+    medium: "Summarize in 2-3 paragraphs covering all the main points clearly.",
+    long: "Summarize in 5-6 paragraphs with detailed explanation of all key points, examples, and insights.",
+  };
 
-export async function summarizeKnowledge(content: string): Promise<string> {
-  return groqComplete([
+  return groqComplete(
+    [
+      {
+        role: "system",
+        content: `You are a knowledge summarization assistant. ${instructions[length]} Return only the summary, no preamble.`,
+      },
+      { role: "user", content },
+    ],
     {
-      role: "system",
-      content: "Summarize the given text into 2-3 concise sentences. Return only the summary, no preamble.",
-    },
-    { role: "user", content },
-  ]);
+      max_tokens: length === "long" ? 2048 : length === "medium" ? 1024 : 512,
+    }
+  );
 }
 
 export async function generateTags(content: string): Promise<string[]> {
@@ -55,7 +69,6 @@ export async function generateTags(content: string): Promise<string[]> {
     },
     { role: "user", content },
   ]);
-
   try {
     const cleaned = raw.replace(/```json|```/g, "").trim();
     return JSON.parse(cleaned);
@@ -72,12 +85,26 @@ export async function queryKnowledge(
   return groqComplete([
     {
       role: "system",
-      content: `You are a helpful knowledge base assistant. Use the provided context to answer questions accurately and concisely. If the answer is not in the context, say so honestly.
+      content: `You are Second Brain AI — a powerful, helpful AI assistant.
 
-KNOWLEDGE BASE CONTEXT:
-${context}`,
+You have TWO jobs:
+1. Answer questions from the user's personal knowledge base when relevant
+2. Answer ANY general question using your own knowledge — coding, science, math, history, advice, creative writing, anything
+
+PERSONAL KNOWLEDGE BASE:
+${context}
+
+INSTRUCTIONS:
+- If the question relates to the knowledge base, use it and mention it
+- If the question is general (coding help, facts, advice etc.), answer it fully using your own knowledge
+- Be conversational, clear and helpful
+- Format code with proper markdown code blocks
+- For long answers use bullet points or numbered lists
+- Never say "I don't know" for general questions — you are a powerful AI`,
     },
     ...history,
     { role: "user", content: query },
   ]);
 }
+
+
