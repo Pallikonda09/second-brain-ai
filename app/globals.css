@@ -197,21 +197,92 @@ html, body {
   animation: spin 0.7s linear infinite;
   display: inline-block;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ══════════════════════════════════
-   ANIMATIONS
+   KEYFRAMES
 ══════════════════════════════════ */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 @keyframes fadeDown {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(108,99,255,0.3); }
+  50%       { box-shadow: 0 0 40px rgba(108,99,255,0.6); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ══════════════════════════════════
+   ANIMATION CLASSES
+══════════════════════════════════ */
+.animate-fade-up {
+  animation: fadeUp 0.5s ease forwards !important;
+  opacity: 0 !important;
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards !important;
+  opacity: 0 !important;
+}
+.animate-scale-in {
+  animation: scaleIn 0.3s ease forwards !important;
+  opacity: 0 !important;
+}
+
+/* Staggered delays */
+.delay-100 { animation-delay: 0.1s !important; }
+.delay-200 { animation-delay: 0.2s !important; }
+.delay-300 { animation-delay: 0.3s !important; }
+.delay-400 { animation-delay: 0.4s !important; }
+.delay-500 { animation-delay: 0.5s !important; }
+.delay-600 { animation-delay: 0.6s !important; }
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--surface-3) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite !important;
+  border-radius: 8px;
+}
+
+/* Hover lift */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+/* Pulse glow */
+.pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite !important;
 }
 
 /* ══════════════════════════════════
    MOBILE RESPONSIVE
 ══════════════════════════════════ */
-
-/* Prevent iOS input zoom */
 @media (max-width: 640px) {
   .input, input, textarea, select {
     font-size: 16px !important;
@@ -229,7 +300,6 @@ html, body {
   }
 }
 
-/* Hide/show on mobile */
 @media (max-width: 768px) {
   .hide-mobile { display: none !important; }
 }
